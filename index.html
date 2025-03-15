@@ -1,8 +1,49 @@
 <html>
-  <head>
-    
-  </head>
-  <body>
-    <p>gamessss</p>
-  </body>
+
+<head>
+
+</head>
+
+<body>
+  <canvas id="screen" width="1850" height="1000"></canvas>
+
+
+
+</body>
+<script>
+  function rect(x, y, w, l, color) {
+    ctx.fillStyle = color
+    ctx.fillRect(x, y, w, l)
+  }
+  /**
+   * @type {HTMLCanvasElement}
+   */
+  let canvas = document.getElementById("screen");
+  let ctx = canvas.getContext('2d');
+  let wd = canvas.width / 2
+  let hi = canvas.height / 2
+  let skin = new Image()
+  skin.src = "./assets/bluechillguy.png"
+
+  function gameLoop() {
+    rect(0, 0, 1850, 1000, "sienna")
+    ctx.drawImage(skin, wd - 100, hi - 100, 200, 200)
+  }
+
+  setInterval(gameLoop, 1000 / 60)
+
+
+
+</script>
+
+<style>
+  body {
+    margin: 0;
+    background-color: sienna;
+
+
+
+  }
+</style>
+
 </html>
