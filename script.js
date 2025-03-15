@@ -2,6 +2,23 @@ function rect(x, y, w, l, color) {
     ctx.fillStyle = color
     ctx.fillRect(x, y, w, l)
 }
+window.addEventListener('keydown', function(event) {
+        if(Event.keycode == 87) {
+            //w key
+            rect(100, 100, 100, 100, "red");
+        }
+        else if(Event.keycode == 83) {
+            //s key
+            alert('Right was pressed');
+        }
+        else if(Event.keycode == 68) {
+            //d key
+            alert('Right was pressed');
+        }
+        else if(Event.keycode == 65) {
+            alert('Right was pressed');
+        }
+    });
 /**
  * @type {HTMLCanvasElement}
  */
@@ -17,8 +34,9 @@ tree.src = "./assets/tree.png"
 
 function gameLoop() {
     rect(0, 0, 1850, 1000, "sienna")
+    
     ctx.drawImage(tree, 500, 700,)
-    ctx.drawImage(skin, wd - 100, hi - 100, )
+    ctx.drawImage(skin, wd - 100, hi - 50, )
 }
 
 setInterval(gameLoop, 1000 / 60)
