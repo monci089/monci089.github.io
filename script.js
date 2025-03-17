@@ -33,7 +33,8 @@ let frontset
 let skin = new Image()
 skin.src = "./assets/bluechillguy.png"
 let i_tree = new Image()
-imagesize.push(["tree", 100, 200, 50, 0, 45, "circle"])
+//[name,pixel x, pixel y, center x, center y, collision raidius, horizontal eclipse, vertical eclipse]
+imagesize.push(["tree", 100, 200, 50, -10, 50, 8, 3, "circle"])
 i_tree.src = "./assets/tree.png"
 let tree = ["tree", i_tree]
 
@@ -82,9 +83,7 @@ function dimg(name, x, y, last) {
     //gets the objects true center
     imagecenter = [x + cwidth - imagesize[imgdimen][3] - p_cords[0], -y + cheight - (imagesize[imgdimen][2] - imagesize[imgdimen][4]) + p_cords[1]]
     ctx.drawImage(name[1], imagecenter[0], imagecenter[1])
-    console.log(imagecenter)
-
-    acollidecords.push([x, y, imagesize[imgdimen][5], imagesize[imgdimen][6]])
+    acollidecords.push([x, y, imagesize[imgdimen][5], imagesize[imgdimen][6], imagesize[imgdimen][7], imagesize[imgdimen][8]])
 
 
 
@@ -93,49 +92,53 @@ function dimg(name, x, y, last) {
 
 }
 function movement(x, y) {
-    for(g=0;g<Math.abs(x);g++){
-        if(x>0){
-            p_cords[0] = p_cords[0] +1
-        }else{
-            p_cords[0] = p_cords[0] -1
+    for (g = 0; g < Math.abs(x); g++) {
+        if (x > 0) {
+            p_cords[0] = p_cords[0] + 1
+        } else {
+            p_cords[0] = p_cords[0] - 1
         }
-    
-    for (let i = 0; i < collidecords.length; i++) {
-        work = true
-        //checks distance from player and i object and sees if its within objects collider range
-        while (
-            (collidecords[i][3] == "circle" &&
-                (Math.sqrt(Math.pow((collidecords[i][0]) - p_cords[0], 2) + Math.pow((collidecords[i][1]) - p_cords[1], 2)) < collidecords[i][2])) ||
-            (collidecords[i][3] == "rectangle" &&
-                (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
-            work = false
-            if (x > 0) {
-                p_cords[0]--
-            } else {
-                p_cords[0]++
-            }
 
-        }
-    }
-}
-for(g=0;g<Math.abs(y);g++){
-    if(y>0){
-        p_cords[1] = p_cords[1] +1
-    }else{
-        p_cords[1] = p_cords[1] -1
-    }
-    for (let i = 0; i < collidecords.length; i++) {
-        work = true
-        while ((collidecords[i][3] == "circle" && Math.sqrt(Math.pow((collidecords[i][0]) - p_cords[0], 2) + Math.pow((collidecords[i][1]) - p_cords[1], 2)) < collidecords[i][2])) {
-            work = false
-            if (y > 0) {
-                p_cords[1]--
-            } else {
-                p_cords[1]++
+        for (let i = 0; i < collidecords.length; i++) {
+            console.log(Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
+            Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2))
+            work = true
+            //checks distance from player and i object and sees if its within objects collider range
+            while (
+                (collidecords[i][5] == "circle" &&
+                    (Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
+                        Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2)))<collidecords[i][2] ||
+                (collidecords[i][5] == "rectangle" &&
+                    (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
+                work = false
+                if (x > 0) {
+                    p_cords[0]--
+                } else {
+                    p_cords[0]++
+                }
+
             }
         }
     }
-}
+    for (g = 0; g < Math.abs(y); g++) {
+        if (y > 0) {
+            p_cords[1] = p_cords[1] + 1
+        } else {
+            p_cords[1] = p_cords[1] - 1
+        }
+        for (let i = 0; i < collidecords.length; i++) {
+            work = true
+            while (Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
+            Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2)<collidecords[i][2]) {
+                work = false
+                if (y > 0) {
+                    p_cords[1]--
+                } else {
+                    p_cords[1]++
+                }
+            }
+        }
+    }
 }
 
 function gameLoop() {
@@ -202,8 +205,8 @@ function gameLoop() {
     imglist.push([tree, 330, 610])
     imglist.push([tree, -110, 310])
     imglist.push([tree, 550, 310])
-    imglist.push([tree, 3-150, -410])
-    imglist.push([tree, 120, -110])
+    imglist.push([tree, 3 - 150, -410])
+    imglist.push([tree, 310, 0])
     imglist = bubbleSort(imglist, imglist.length)
     for (let i = imglist.length - 1; i >= 0; i--) {
         if (imglist[i][2] < p_cords[1]) {
