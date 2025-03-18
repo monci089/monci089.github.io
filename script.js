@@ -30,18 +30,52 @@ let imglast = []
 let imglist = []
 let frontset
 
+
+class metaimg {
+    constructor(pixelx, pixely, centerx, centery, collisionraidius, horizontaleclipse, verticaleclipse, collisiontype, realimage) {
+        this.pixelx = pixelx;
+        this.pixely = pixely;
+        this.centerx = centerx;
+        this.centery = centery;
+        this.collisionraidius = collisionraidius;
+        this.horizontaleclipse = horizontaleclipse;
+        this.verticaleclipse = verticaleclipse;
+        this.collisiontype = collisiontype;
+        this.realimage = realimage;
+    }
+    draw(x, y) {
+        imglist.push([this, x, y])
+    }
+
+}
+class character{
+    constructor(pixelx, pixely, centerx, centery, collisionraidius, horizontaleclipse, verticaleclipse, collisiontype, realimage, xcord, ycord){
+        this.pixelx = pixelx;
+        this.pixely = pixely;
+        this.centerx = centerx;
+        this.centery = centery;
+        this.collisionraidius = collisionraidius;
+        this.horizontaleclipse = horizontaleclipse;
+        this.verticaleclipse = verticaleclipse;
+        this.collisiontype = collisiontype;
+        this.realimage = realimage;
+        this.xcord = xcord;
+        this.ycord = ycord;
+    }
+}
+
+
+
+
+
+
 let skin = new Image()
 skin.src = "./assets/bluechillguy.png"
 let i_tree = new Image()
-//[name,pixel x, pixel y, center x, center y, collision raidius, horizontal eclipse, vertical eclipse]
-imagesize.push(["tree", 100, 200, 50, -10, 50, 8, 3, "circle"])
 i_tree.src = "./assets/tree.png"
-let tree = ["tree", i_tree]
-
-let i_fence = new Image()
-imagesize.push(["fence", 100, 100, 50, 50, 50, "circle"])
-i_fence.src = "./assets/fence.png"
-let fence = ["fence", i_fence]
+//[name,pixel x, pixel y, center x, center y, collision raidius, horizontal eclipse, vertical eclipse]
+let tree = new metaimg(100, 200, 50, -10, 100, 50, 50, "circle", i_tree)
+let player=new character(100,100,50,0,0,0,0,"none",skin,0,0)
 
 
 function rect(x, y, w, l, color) {
@@ -63,33 +97,12 @@ function bubbleSort(arr, n) {
     }
     return arr;
 }
-function dimg(name, x, y, last) {
-    /*checks if player is behidn or infront of object
-    
-    if (y < p_cords[1] && last != "last") {
-        imglast.push([name, x, y])
-    }
-*/
-
+function dimg(objc, x, y) {
     imagecenter = []
-    //finds objects meta data
-    for (let i = 0; i < imagesize.length; i++) {
-        if (imagesize[i][0] == name[0]) {
-            imgdimen = i
-
-            break
-        }
-    }
     //gets the objects true center
-    imagecenter = [x + cwidth - imagesize[imgdimen][3] - p_cords[0], -y + cheight - (imagesize[imgdimen][2] - imagesize[imgdimen][4]) + p_cords[1]]
-    ctx.drawImage(name[1], imagecenter[0], imagecenter[1])
-    acollidecords.push([x, y, imagesize[imgdimen][5], imagesize[imgdimen][6], imagesize[imgdimen][7], imagesize[imgdimen][8]])
-
-
-
-
-
-
+    imagecenter = [x + cwidth - objc.centerx - p_cords[0], -y + cheight - (objc.pixely - objc.centery) + p_cords[1]]
+    ctx.drawImage(objc.realimage, imagecenter[0], imagecenter[1])
+    acollidecords.push([objc, imagecenter[0], imagecenter[1]])
 }
 function movement(x, y) {
     for (g = 0; g < Math.abs(x); g++) {
@@ -98,19 +111,20 @@ function movement(x, y) {
         } else {
             p_cords[0] = p_cords[0] - 1
         }
-
         for (let i = 0; i < collidecords.length; i++) {
-            console.log(Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
-            Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2))
+            console.log(Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
+            Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))
+            console.log(collidecords[i][0].collisionraidius)
             work = true
             //checks distance from player and i object and sees if its within objects collider range
             while (
-                (collidecords[i][5] == "circle" &&
-                    (Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
-                        Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2)))<collidecords[i][2] ||
-                (collidecords[i][5] == "rectangle" &&
+                (collidecords[i][0].collisiontype == "circle" &&
+                    (Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
+                        Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))) < collidecords[i][0].collisionraidius ||
+                (collidecords[i][0].collisiontype == "rectangle" &&
                     (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
                 work = false
+                console.log("work")
                 if (x > 0) {
                     p_cords[0]--
                 } else {
@@ -128,8 +142,13 @@ function movement(x, y) {
         }
         for (let i = 0; i < collidecords.length; i++) {
             work = true
-            while (Math.pow((collidecords[i][0]) - p_cords[0], 2) / Math.pow(collidecords[i][3], 2) +
-            Math.pow((collidecords[i][1]) - p_cords[1], 2) / Math.pow(collidecords[i][4], 2)<collidecords[i][2]) {
+            while (
+
+                (collidecords[i][0].collisiontype == "circle" &&
+                    (Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
+                        Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))) < collidecords[i][0].collisionraidius ||
+                (collidecords[i][0].collisiontype == "rectangle" &&
+                    (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
                 work = false
                 if (y > 0) {
                     p_cords[1]--
@@ -139,6 +158,7 @@ function movement(x, y) {
             }
         }
     }
+    console.log(p_cords)
 }
 
 function gameLoop() {
@@ -146,7 +166,7 @@ function gameLoop() {
     movestop = "free"
     collidecords = []
     for (let i = 0; i < acollidecords.length; i++) {
-        if (Math.sqrt(Math.pow((acollidecords[i][0]) - p_cords[0], 2) + Math.pow((acollidecords[i][1]) - p_cords[1], 2)) < 600) {
+        if (Math.sqrt(Math.pow((acollidecords[i][1]) - p_cords[0], 2) + Math.pow((acollidecords[i][2]) - p_cords[1], 2)) < 600) {
             collidecords.push(acollidecords[i])
         }
     }
@@ -196,28 +216,18 @@ function gameLoop() {
             }
         }
     }
-    imglist.push([tree, 0, 210])
-    imglist.push([tree, -100, -110])
-    imglist.push([tree, 150, 510])
-    imglist.push([tree, -100, 110])
-    imglist.push([tree, 150, -120])
-    imglist.push([tree, 220, 010])
-    imglist.push([tree, 330, 610])
-    imglist.push([tree, -110, 310])
-    imglist.push([tree, 550, 310])
-    imglist.push([tree, 3 - 150, -410])
-    imglist.push([tree, 310, 0])
+    tree.draw(100, 100)
     imglist = bubbleSort(imglist, imglist.length)
     for (let i = imglist.length - 1; i >= 0; i--) {
         if (imglist[i][2] < p_cords[1]) {
             frontset = i
             break
         }
-        dimg(imglist[i][0], imglist[i][1], imglist[i][2],)
+        dimg(imglist[i][0], imglist[i][1], imglist[i][2])
     }
     ctx.drawImage(skin, cwidth - p_dimensions[0], cheight - p_dimensions[1])
     for (let i = frontset; i >= 0; i--) {
-        dimg(imglist[i][0], imglist[i][1], imglist[i][2],)
+        dimg(imglist[i][0], imglist[i][1], imglist[i][2])
     }
     frontset = -1
     /*
