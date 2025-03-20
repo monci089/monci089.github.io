@@ -6,8 +6,6 @@ let canvas = document.getElementById("screen");
 let ctx = canvas.getContext('2d');
 let cwidth = canvas.width / 2
 let cheight = canvas.height / 2
-let p_dimensions = [50, 100]
-let p_cords = [0, 0]
 let keysdown = []
 let wdelete
 let acollidecords = []
@@ -29,8 +27,12 @@ let work
 let imglast = []
 let imglist = []
 let frontset
-
-
+let xh2
+let a2
+let yk2
+let b2
+let xh
+let yk
 class metaimg {
     constructor(pixelx, pixely, centerx, centery, collisionraidius, horizontaleclipse, verticaleclipse, collisiontype, realimage) {
         this.pixelx = pixelx;
@@ -48,8 +50,8 @@ class metaimg {
     }
 
 }
-class character{
-    constructor(pixelx, pixely, centerx, centery, collisionraidius, horizontaleclipse, verticaleclipse, collisiontype, realimage, xcord, ycord){
+class character {
+    constructor(pixelx, pixely, centerx, centery, collisionraidius, horizontaleclipse, verticaleclipse, collisiontype, realimage, xcord, ycord,) {
         this.pixelx = pixelx;
         this.pixely = pixely;
         this.centerx = centerx;
@@ -61,6 +63,11 @@ class character{
         this.realimage = realimage;
         this.xcord = xcord;
         this.ycord = ycord;
+
+    }
+    set(x, y, npctype) {
+        imglist.push([this, x, y])
+
     }
 }
 
@@ -74,9 +81,14 @@ skin.src = "./assets/bluechillguy.png"
 let i_tree = new Image()
 i_tree.src = "./assets/tree.png"
 //[name,pixel x, pixel y, center x, center y, collision raidius, horizontal eclipse, vertical eclipse]
-let tree = new metaimg(100, 200, 50, -10, 100, 50, 50, "circle", i_tree)
-let player=new character(100,100,50,0,0,0,0,"none",skin,0,0)
-
+let tree = new metaimg(100, 200, 50, 0, 50, 9, 6, "circle", i_tree)
+let player = new character(100, 100, 50, 0, 0, 0, 0, "none", skin, 0, 0)
+let i_sockmonkey = new Image()
+i_sockmonkey = "./assets/sockmonkey.png"
+let sockmonkey = new character(100, 100, 50, 0, 20, 5, 5, "circle", skin, -100, 0, -100)
+let i_fence = new Image()
+i_fence.src = "./assets/fence.png"
+let fence = new metaimg(100, 100, 50, 0, 50, 6, 6, "rectangle", i_fence)
 
 function rect(x, y, w, l, color) {
     ctx.fillStyle = color
@@ -100,65 +112,104 @@ function bubbleSort(arr, n) {
 function dimg(objc, x, y) {
     imagecenter = []
     //gets the objects true center
-    imagecenter = [x + cwidth - objc.centerx - p_cords[0], -y + cheight - (objc.pixely - objc.centery) + p_cords[1]]
+    imagecenter = [x + cwidth - objc.centerx - player.xcord, -y + cheight - (objc.pixely - objc.centery) + player.ycord]
     ctx.drawImage(objc.realimage, imagecenter[0], imagecenter[1])
-    acollidecords.push([objc, imagecenter[0], imagecenter[1]])
+    acollidecords.push([objc, x, y])
+    console.log(acollidecords[0])
 }
 function movement(x, y) {
     for (g = 0; g < Math.abs(x); g++) {
         if (x > 0) {
-            p_cords[0] = p_cords[0] + 1
+            player.xcord = player.xcord + 1
         } else {
-            p_cords[0] = p_cords[0] - 1
+            player.xcord = player.xcord - 1
         }
         for (let i = 0; i < collidecords.length; i++) {
-            console.log(Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
-            Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))
-            console.log(collidecords[i][0].collisionraidius)
-            work = true
+            xh = collidecords[i][1] - player.xcord
+            xh2 = Math.pow(xh, 2)
+            a2 = Math.pow(collidecords[i][0].horizontaleclipse, 2)
+            yk = collidecords[i][2] - player.ycord
+            yk2 = Math.pow(yk, 2)
+            b2 = Math.pow(collidecords[i][0].verticaleclipse, 2)
+
             //checks distance from player and i object and sees if its within objects collider range
             while (
-                (collidecords[i][0].collisiontype == "circle" &&
-                    (Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
-                        Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))) < collidecords[i][0].collisionraidius ||
+                ((collidecords[i][0].collisiontype == "circle" &&
+                    xh2 / a2 + yk2 / b2) < collidecords[i][0].collisionraidius) ||
                 (collidecords[i][0].collisiontype == "rectangle" &&
-                    (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
-                work = false
-                console.log("work")
+                    Math.abs(xh) < (collidecords[i][0].horizontaleclipse) &&
+                    Math.abs(yk) < (collidecords[i][0].verticaleclipse))) {
+                console.log(Math.abs(xh) < (collidecords[i][0].horizontaleclipse))
+                xh = collidecords[i][1] - player.xcord
+                xh2 = Math.pow(xh, 2)
+                a2 = Math.pow(collidecords[i][0].horizontaleclipse, 2)
+                yk = collidecords[i][2] - player.ycord
+                yk2 = Math.pow(yk, 2)
+                b2 = Math.pow(collidecords[i][0].verticaleclipse, 2)
+                console.log("d")
                 if (x > 0) {
-                    p_cords[0]--
+                    player.xcord--
                 } else {
-                    p_cords[0]++
+                    player.xcord++
+                } if (collidecords[i][2] < cheight) {
+                    if (((collidecords[i][0].collisiontype == "circle" &&
+                        xh2 / a2 + Math.pow((collidecords[i][2]) - player.ycord + 1, 2) / b2) > collidecords[i][0].collisionraidius)) {
+                        player.ycord--
+                    }
+                    if (((collidecords[i][0].collisiontype == "circle" &&
+                        xh2 / a2 + Math.pow((collidecords[i][2]) - player.ycord - 1, 2) / b2) > collidecords[i][0].collisionraidius)) {
+                        player.ycord++
+                    }
                 }
+
+
 
             }
         }
     }
     for (g = 0; g < Math.abs(y); g++) {
         if (y > 0) {
-            p_cords[1] = p_cords[1] + 1
+            player.ycord = player.ycord + 1
         } else {
-            p_cords[1] = p_cords[1] - 1
+            player.ycord = player.ycord - 1
         }
         for (let i = 0; i < collidecords.length; i++) {
-            work = true
+            xh = collidecords[i][1] - player.xcord
+            xh2 = Math.pow(xh, 2)
+            a2 = Math.pow(collidecords[i][0].horizontaleclipse, 2)
+            yk = collidecords[i][2] - player.ycord
+            yk2 = Math.pow(yk, 2)
+            b2 = Math.pow(collidecords[i][0].verticaleclipse, 2)
             while (
-
-                (collidecords[i][0].collisiontype == "circle" &&
-                    (Math.pow((collidecords[i][1]) - p_cords[0], 2) / Math.pow(collidecords[i][0].horizontaleclipse, 2) +
-                        Math.pow((collidecords[i][2]) - p_cords[1], 2) / Math.pow(collidecords[i][0].verticaleclipse, 2))) < collidecords[i][0].collisionraidius ||
+                ((collidecords[i][0].collisiontype == "circle" &&
+                    xh2 / a2 + yk2 / b2) < collidecords[i][0].collisionraidius) ||
                 (collidecords[i][0].collisiontype == "rectangle" &&
-                    (Math.abs(x - (collidecords[i][0])) < collidecords[i][2] && (p_cords[1] < collidecords[i][1] + collidecords[i][2] && p_cords[1] > collidecords[i][1] - collidecords[i][2])))) {
-                work = false
+                    (Math.abs(xh) <= (collidecords[i][0].horizontaleclipse) &&
+                        Math.abs(yk) <= (collidecords[i][0].verticaleclipse)))) {
+                xh = collidecords[i][1] - player.xcord
+                xh2 = Math.pow(xh, 2)
+                a2 = Math.pow(collidecords[i][0].horizontaleclipse, 2)
+                yk = collidecords[i][2] - player.ycord
+                yk2 = Math.pow(yk, 2)
+                b2 = Math.pow(collidecords[i][0].verticaleclipse, 2)
+                console.log("D")
                 if (y > 0) {
-                    p_cords[1]--
+                    player.ycord--
                 } else {
-                    p_cords[1]++
+                    player.ycord++
+                } if (collidecords[i][1] < cwidth) {
+                    if (((collidecords[i][0].collisiontype == "circle" &&
+                        Math.pow((collidecords[i][1]) - player.xcord + 1, 2) / a2 + yk2 / b2) > collidecords[i][0].collisionraidius)) {
+                        player.xcord--
+                    }
+                    if (((collidecords[i][0].collisiontype == "circle" &&
+                        Math.pow((collidecords[i][1]) - player.xcord - 1, 2) / a2 + yk2 / b2) > collidecords[i][0].collisionraidius)) {
+                        player.xcord++
+                    }
                 }
             }
         }
     }
-    console.log(p_cords)
 }
 
 function gameLoop() {
@@ -166,7 +217,7 @@ function gameLoop() {
     movestop = "free"
     collidecords = []
     for (let i = 0; i < acollidecords.length; i++) {
-        if (Math.sqrt(Math.pow((acollidecords[i][1]) - p_cords[0], 2) + Math.pow((acollidecords[i][2]) - p_cords[1], 2)) < 600) {
+        if (Math.sqrt(Math.pow((acollidecords[i][1]) - player.xcord, 2) + Math.pow((acollidecords[i][2]) - player.ycord, 2)) < 600) {
             collidecords.push(acollidecords[i])
         }
     }
@@ -217,15 +268,16 @@ function gameLoop() {
         }
     }
     tree.draw(100, 100)
+    fence.draw(200, 0)
     imglist = bubbleSort(imglist, imglist.length)
     for (let i = imglist.length - 1; i >= 0; i--) {
-        if (imglist[i][2] < p_cords[1]) {
+        if (imglist[i][2] < player.ycord) {
             frontset = i
             break
         }
         dimg(imglist[i][0], imglist[i][1], imglist[i][2])
     }
-    ctx.drawImage(skin, cwidth - p_dimensions[0], cheight - p_dimensions[1])
+    ctx.drawImage(skin, cwidth - player.centerx, cheight - (player.pixely - player.centery))
     for (let i = frontset; i >= 0; i--) {
         dimg(imglist[i][0], imglist[i][1], imglist[i][2])
     }
